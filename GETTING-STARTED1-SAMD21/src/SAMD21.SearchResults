@@ -1,0 +1,41 @@
+---- port_get_config_defaults Matches (10 in 3 files) ----
+Board_init.c (asf\...\samd21_xplained_pro):62
+	port_get_config_defaults(&pin_conf);
+
+	/* Configure LEDs as outputs, turn them off */
+Board_init.c (asf\...\samd21_xplained_pro):75
+	port_get_config_defaults(&pin_conf);
+	pin_conf.direction  = PORT_PIN_DIR_OUTPUT;
+	port_pin_set_config(AT86RFX_SPI_SCK, &pin_conf);
+Main.c:263
+	port_get_config_defaults(&pin_data);
+	pin_data.direction = PORT_PIN_DIR_OUTPUT;
+	port_pin_set_config(PIN_Data, &pin_data);
+Main.c:270
+port_get_config_defaults(&pin);
+	pin.direction = PORT_PIN_DIR_OUTPUT;
+	port_pin_set_config(LED0_PIN, &pin);
+Main.c:283
+	port_get_config_defaults(&pin_clk);
+	pin_clk.direction = PORT_PIN_DIR_OUTPUT;	
+	port_pin_set_config(PIN_I2C_CLK, &pin_clk);
+Main.c:288
+	port_get_config_defaults(&pin_data);
+	pin_data.direction = PORT_PIN_DIR_OUTPUT;	
+	port_pin_set_config(PIN_I2C_DATA, &pin_clk);
+Main.c:465
+	port_get_config_defaults(&pin);
+	pin.direction = PORT_PIN_DIR_OUTPUT;
+	port_pin_set_config(LED0_PIN, &pin);
+Port.h (asf\sam0\drivers\port):291
+ *  initialized by the \ref port_get_config_defaults() function before being
+ *  modified by the user application.
+ */
+Port.h (asf\sam0\drivers\port):429
+static inline void port_get_config_defaults(
+		struct port_config *const config)
+{
+Port.h (asf\sam0\drivers\port):651
+	port_get_config_defaults(&pin_conf);
+	/* Configure the GPIO pin as outputs*/
+	pin_conf.direction  = PORT_PIN_DIR_OUTPUT;
