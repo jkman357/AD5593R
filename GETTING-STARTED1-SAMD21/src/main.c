@@ -470,7 +470,13 @@ void Read_Register(unsigned char command_H, unsigned char command_L,
 
 #define AD5593r_DeviceAddr	0x22
 #define ConfigDAC			0x05
+#define ConfigADC			0x04
 #define ConfigPowerRef		0x0B
+#define ConfigADCSeqReg		0x02
+#define ADCBufferEnable		0x02
+#define ADCChannelEnable	0xFF
+#define	ADCChannel			0xFF
+#define ADC_ReadBack		0x40
 
 void Config_DAC_Mode(void)
 {
@@ -527,7 +533,7 @@ int main(void)
 	struct port_config pin;
 	unsigned int count;
 	unsigned int i;
-	unsigned char buffer[4];
+	unsigned char buffer[16];
 	system_init();
 
 	/*Configure UART console.*/
@@ -537,36 +543,101 @@ int main(void)
 	delay_init();
 	
 	IIC_Init();
-
+	/*
 	Config_DAC_Mode();
 	Config_DAC_InternalRef();
 	DAC_Voltage(0,0x100);
 
 	i = 0x100;
-	while(1)
-		{
-			DAC_Voltage(0,i);
-			delay_ms(10);
-			i +=0x100;
-			if(i >= 0xFFF){
-				i = 0;
-				delay_ms(100);
-			}
+	while(1){
+		DAC_Voltage(0,i);
+		delay_ms(10);
+		i +=0x100;
+		if(i >= 0xFFF){
+			i = 0;
+			delay_ms(100);
 		}
+	}
+	*/
+
+	//ADC function
+	//step1 setting ADC PIN
+	IIC_Start();  
+	IIC_Send_Byte(AD5593r_DeviceAddr);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(ConfigADC);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(0x00);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(ADCChannel);
+	IIC_Wait_Ack();
+	IIC_Stop();
+
+	//using internal Vref
+	IIC_Start();  
+	IIC_Send_Byte(AD5593r_DeviceAddr);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(ConfigPowerRef);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(0x02);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(0x00);
+	IIC_Wait_Ack();
+	IIC_Stop();
+
+	//step 2 setting ADC sequence register
+	IIC_Start();  
+	IIC_Send_Byte(AD5593r_DeviceAddr);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(ConfigADCSeqReg);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(ADCBufferEnable);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(ADCChannelEnable);
+	IIC_Wait_Ack();
+	IIC_Stop();
+
+	//step 3 Reading ADC from Channel7 to Channel0
+	IIC_Start();  
+	IIC_Send_Byte(AD5593r_DeviceAddr);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(ADC_ReadBack);
+	IIC_Wait_Ack();
+	IIC_Stop();
+
+	IIC_Start();  
+	IIC_Send_Byte((AD5593r_DeviceAddr | 0x01)); //read
+	IIC_Wait_Ack();
+	IIC_Send_Byte(ADC_ReadBack);
+	IIC_Wait_Ack();
 
 	
-	//i = 0;
-	//while(1)
-	//{
-	//	DAC_Voltage(0,i);	
-	//	i++;
-	//	delay_us(100);
-	//	if (i >= 4096){
-	//		i = 0;
-	//		delay_ms(1);
-	//	}
-	//}	
+	IIC_Read_Byte(1,&buffer[15]); //channel7 high byte
+	IIC_Read_Byte(1,&buffer[14]); //channel7 low byte
 
+	IIC_Read_Byte(1,&buffer[13]); //channel6 high byte
+	IIC_Read_Byte(1,&buffer[12]); //channel6 low byte
+
+	IIC_Read_Byte(1,&buffer[11]); //channel5 high byte
+	IIC_Read_Byte(1,&buffer[10]); //channel5 low byte
+
+	IIC_Read_Byte(1,&buffer[9]); //channel4 high byte
+	IIC_Read_Byte(1,&buffer[8]); //channel4 low byte
+
+	IIC_Read_Byte(1,&buffer[7]); //channel3 high byte
+	IIC_Read_Byte(1,&buffer[6]); //channel3 low byte
+
+	IIC_Read_Byte(1,&buffer[5]); //channel2 high byte
+	IIC_Read_Byte(1,&buffer[4]); //channel2 low byte
+
+	IIC_Read_Byte(1,&buffer[3]); //channel1 high byte
+	IIC_Read_Byte(1,&buffer[2]); //channel1 low byte
+	
+	IIC_Read_Byte(1,&buffer[1]); //channel0 high byte
+	IIC_Read_Byte(0,&buffer[0]); //channel0 low byte
+
+	
+	IIC_Stop();
 			
 }
 
